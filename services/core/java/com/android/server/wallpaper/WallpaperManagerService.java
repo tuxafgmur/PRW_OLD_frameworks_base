@@ -128,7 +128,7 @@ public class WallpaperManagerService extends IWallpaperManager.Stub
         implements IWallpaperManagerService {
     static final String TAG = "WallpaperManagerService";
     static final boolean DEBUG = false;
-    static final boolean DEBUG_LIVE = DEBUG || true;
+    static final boolean DEBUG_LIVE = false;
 
     public static class Lifecycle extends SystemService {
         private IWallpaperManagerService mService;

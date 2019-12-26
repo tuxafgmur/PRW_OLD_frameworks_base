@@ -19,7 +19,7 @@ import android.os.BatteryStats;
 import android.util.Log;
 
 public class BluetoothPowerCalculator extends PowerCalculator {
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = false;
     private static final String TAG = "BluetoothPowerCalculator";
     private final double mIdleMa;
     private final double mRxMa;

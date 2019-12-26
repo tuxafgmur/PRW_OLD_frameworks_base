@@ -21,7 +21,7 @@ import android.util.Log;
 
 public class CpuPowerCalculator extends PowerCalculator {
     private static final String TAG = "CpuPowerCalculator";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = false;
     private static final long MICROSEC_IN_HR = (long) 60 * 60 * 1000 * 1000;
     private final PowerProfile mProfile;
 

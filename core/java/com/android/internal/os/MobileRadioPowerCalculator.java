@@ -21,7 +21,7 @@ import android.util.Log;
 
 public class MobileRadioPowerCalculator extends PowerCalculator {
     private static final String TAG = "MobileRadioPowerController";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = false;
     private final double mPowerRadioOn;
     private final double[] mPowerBins = new double[SignalStrength.NUM_SIGNAL_STRENGTH_BINS];
     private final double mPowerScan;

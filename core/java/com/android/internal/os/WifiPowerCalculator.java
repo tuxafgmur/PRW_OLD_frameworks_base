@@ -23,7 +23,7 @@ import android.util.Log;
  * from the WiFi controller.
  */
 public class WifiPowerCalculator extends PowerCalculator {
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = false;
     private static final String TAG = "WifiPowerCalculator";
     private final double mIdleCurrentMa;
     private final double mTxCurrentMa;

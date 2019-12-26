@@ -22,7 +22,7 @@ import android.util.Log;
  * Estimates WiFi power usage based on timers in BatteryStats.
  */
 public class WifiPowerEstimator extends PowerCalculator {
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = false;
     private static final String TAG = "WifiPowerEstimator";
     private final double mWifiPowerPerPacket;
     private final double mWifiPowerOn;

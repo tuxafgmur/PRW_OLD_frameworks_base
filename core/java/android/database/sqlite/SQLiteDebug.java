@@ -37,16 +37,14 @@ public final class SQLiteDebug {
      *
      * Enable using "adb shell setprop log.tag.SQLiteLog VERBOSE".
      */
-    public static final boolean DEBUG_SQL_LOG =
-            Log.isLoggable("SQLiteLog", Log.VERBOSE);
+    public static final boolean DEBUG_SQL_LOG = false;
 
     /**
      * Controls the printing of SQL statements as they are executed.
      *
      * Enable using "adb shell setprop log.tag.SQLiteStatements VERBOSE".
      */
-    public static final boolean DEBUG_SQL_STATEMENTS =
-            Log.isLoggable("SQLiteStatements", Log.VERBOSE);
+    public static final boolean DEBUG_SQL_STATEMENTS = false;
 
     /**
      * Controls the printing of wall-clock time taken to execute SQL statements
@@ -54,14 +52,13 @@ public final class SQLiteDebug {
      *
      * Enable using "adb shell setprop log.tag.SQLiteTime VERBOSE".
      */
-    public static final boolean DEBUG_SQL_TIME =
-            Log.isLoggable("SQLiteTime", Log.VERBOSE);
+    public static final boolean DEBUG_SQL_TIME = false;
 
     /**
      * True to enable database performance testing instrumentation.
      * @hide
      */
-    public static final boolean DEBUG_LOG_SLOW_QUERIES = Build.IS_DEBUGGABLE;
+    public static final boolean DEBUG_LOG_SLOW_QUERIES = false;
 
     private SQLiteDebug() {
     }

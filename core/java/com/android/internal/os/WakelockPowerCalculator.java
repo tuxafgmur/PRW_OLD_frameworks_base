@@ -21,7 +21,7 @@ import android.util.Log;
 
 public class WakelockPowerCalculator extends PowerCalculator {
     private static final String TAG = "WakelockPowerCalculator";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = false;
     private final double mPowerWakelock;
     private long mTotalAppWakelockTimeMs = 0;
 

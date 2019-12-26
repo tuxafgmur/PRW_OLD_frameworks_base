@@ -7,7 +7,7 @@ import android.util.LongSparseArray;
 public class MemoryPowerCalculator extends PowerCalculator {
 
     public static final String TAG = "MemoryPowerCalculator";
-    private static final boolean DEBUG = BatteryStatsHelper.DEBUG;
+    private static final boolean DEBUG = false;
     private final double[] powerAverages;
 
     public MemoryPowerCalculator(PowerProfile profile) {
