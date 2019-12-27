@@ -201,10 +201,6 @@ public final class ActiveServices {
 
                 // Now stop them all
                 final int numToStop = toStop.size();
-                if (numToStop > 0 && DEBUG_FOREGROUND_SERVICE) {
-                    Slog.i(TAG, "Package " + packageName + "/" + uid
-                            + " entering FAS with foreground services");
-                }
                 for (int i = 0; i < numToStop; i++) {
                     final ServiceRecord r = toStop.get(i);
                     if (DEBUG_FOREGROUND_SERVICE) {
@@ -299,7 +295,6 @@ public final class ActiveServices {
             for (int i=0, N=mStartingBackground.size(); i<N; i++) {
                 ServiceRecord r = mStartingBackground.get(i);
                 if (r.startingBgTimeout <= now) {
-                    Slog.i(TAG, "Waited long enough for: " + r);
                     mStartingBackground.remove(i);
                     N--;
                     i--;
@@ -578,7 +573,6 @@ public final class ActiveServices {
                 }
                 if (smap.mStartingBackground.size() >= mMaxStartingBackground) {
                     // Something else is starting, delay!
-                    Slog.i(TAG_SERVICE, "Delaying start of: " + r);
                     smap.mDelayedStartList.add(r);
                     r.delayed = true;
                     return r.name;
@@ -2117,8 +2111,6 @@ public final class ActiveServices {
         boolean canceled = false;
 
         if (mAm.isShuttingDownLocked()) {
-            Slog.w(TAG, "Not scheduling restart of crashed service " + r.shortName
-                    + " - system is shutting down");
             return false;
         }
 
@@ -2249,8 +2241,6 @@ public final class ActiveServices {
         mAm.mHandler.removeCallbacks(r.restarter);
         mAm.mHandler.postAtTime(r.restarter, r.nextRestartTime);
         r.nextRestartTime = SystemClock.uptimeMillis() + r.restartDelay;
-        Slog.w(TAG, "Scheduling restart of crashed service "
-                + r.shortName + " in " + r.restartDelay + "ms");
 
         if (SERVICE_RESCHEDULE && DEBUG_DELAYED_SERVICE) {
             for (int i=mRestartingServices.size()-1; i>=0; i--) {
@@ -2355,8 +2345,6 @@ public final class ActiveServices {
     private String bringUpServiceLocked(ServiceRecord r, int intentFlags, boolean execInFg,
             boolean whileRestarting, boolean permissionsReviewRequired)
             throws TransactionTooLargeException {
-        //Slog.i(TAG, "Bring up service:");
-        //r.dump("  ");
 
         if (r.app != null && r.app.thread != null) {
             sendServiceArgsLocked(r, execInFg, false);
@@ -2709,8 +2697,6 @@ public final class ActiveServices {
 
     private final void bringDownServiceIfNeededLocked(ServiceRecord r, boolean knowConn,
             boolean hasConn) {
-        //Slog.i(TAG, "Bring down service:");
-        //r.dump("  ");
 
         if (isServiceNeededLocked(r, knowConn, hasConn)) {
             return;
@@ -2725,8 +2711,6 @@ public final class ActiveServices {
     }
 
     private final void bringDownServiceLocked(ServiceRecord r) {
-        //Slog.i(TAG, "Bring down service:");
-        //r.dump("  ");
 
         // Report to all of the connections that the service is no longer
         // available.
@@ -3223,7 +3207,6 @@ public final class ActiveServices {
                     return true;
                 }
                 didSomething = true;
-                Slog.i(TAG, "  Force stopping service " + service);
                 if (service.app != null) {
                     service.app.removed = killProcess;
                     if (!service.app.persistent) {
@@ -3316,7 +3299,6 @@ public final class ActiveServices {
             ServiceRecord sr = services.get(i);
             if (sr.startRequested) {
                 if ((sr.serviceInfo.flags&ServiceInfo.FLAG_STOP_WITH_TASK) != 0) {
-                    Slog.i(TAG, "Stopping service " + sr.shortName + ": remove task");
                     stopServiceLocked(sr);
                 } else {
                     sr.pendingStarts.add(new ServiceRecord.StartItem(sr, true,

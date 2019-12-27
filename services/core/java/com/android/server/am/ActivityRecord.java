@@ -223,7 +223,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     // TODO(b/67864419): Remove once recents component is overridden
     private static final String LEGACY_RECENTS_PACKAGE_NAME = "com.android.systemui.recents";
 
-    private static final boolean SHOW_ACTIVITY_START_TIME = true;
+    private static final boolean SHOW_ACTIVITY_START_TIME = false;
 
     private static final String ATTR_ID = "id";
     private static final String TAG_INTENT = "intent";
@@ -280,7 +280,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private boolean mLastReportedMultiWindowMode;
     private boolean mLastReportedPictureInPictureMode;
     CompatibilityInfo compat;// last used compatibility mode
-    ActivityRecord resultTo; // who started this entry, so will get our reply
+    ActivityRecord resultTo; // who /*start*/ed this entry, so will get our reply
     final String resultWho; // additional identifier for use by resultTo.
     final int requestCode;  // code given by requester (resultTo)
     ArrayList<ResultInfo> results; // pending ActivityResult objs we have received
@@ -1934,7 +1934,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             CharSequence description) {
         final ActivityStack stack = getStack();
         if (mState != STOPPING) {
-            Slog.i(TAG, "Activity reported stop, but no longer stopping: " + this);
             stack.mHandler.removeMessages(STOP_TIMEOUT_MSG, this);
             return;
         }

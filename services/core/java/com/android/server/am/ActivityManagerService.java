@@ -2259,7 +2259,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                             try {
                                 r.thread.clearDnsCache();
                             } catch (RemoteException ex) {
-                                Slog.w(TAG, "Failed to clear dns cache for: " + r.info.processName);
                             }
                         }
                     }
@@ -3253,7 +3252,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mBatteryStatsService.publish();
         mAppOpsService.publish(mContext);
-        Slog.d("AppOps", "AppOpsService published");
         LocalServices.addService(ActivityManagerInternal.class, new LocalService());
         // Wait for the synchronized block started in mProcessCpuThread,
         // so that any other acccess to mProcessCpuTracker from main thread
@@ -3886,9 +3884,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             nextIndex = addIndex > 0 ? addIndex-1 : addIndex;
         }
-
-        Slog.d(TAG, "Update LRU at " + lrui + " to " + addIndex + " (act="
-                + mLruProcessActivityStart + "): " + app);
         */
 
         if (lrui >= 0) {
@@ -4111,8 +4106,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         ProcessRecord app;
         if (!isolated) {
             app = getProcessRecordLocked(processName, info.uid, keepIfLarge);
-            checkTime(startTime, "startProcess: after getProcessRecord");
-
             if ((intentFlags & Intent.FLAG_FROM_BACKGROUND) != 0) {
                 // If we are in the background, then check to see if this process
                 // is bad.  If so, we will just silently fail.
@@ -4161,24 +4154,20 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (DEBUG_PROCESSES) Slog.v(TAG_PROCESSES, "App already running: " + app);
                 // If this is a new package in the process, add the package to the list
                 app.addPackage(info.packageName, info.versionCode, mProcessStats);
-                checkTime(startTime, "startProcess: done, added package to proc");
                 return app;
             }
 
             // An application record is attached to a previous process,
             // clean it up now.
             if (DEBUG_PROCESSES || DEBUG_CLEANUP) Slog.v(TAG_PROCESSES, "App died: " + app);
-            checkTime(startTime, "startProcess: bad proc running, killing");
             killProcessGroup(app.uid, app.pid);
             handleAppDiedLocked(app, true, true);
-            checkTime(startTime, "startProcess: done killing old proc");
         }
 
         String hostingNameStr = hostingName != null
                 ? hostingName.flattenToShortString() : null;
 
         if (app == null) {
-            checkTime(startTime, "startProcess: creating new process record");
             app = newProcessRecordLocked(info, processName, isolated, isolatedUid);
             if (app == null) {
                 Slog.w(TAG, "Failed making new process record for "
@@ -4188,11 +4177,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.crashHandler = crashHandler;
             app.isolatedEntryPoint = entryPoint;
             app.isolatedEntryPointArgs = entryPointArgs;
-            checkTime(startTime, "startProcess: done creating new process record");
         } else {
             // If this is a new package in the process, add the package to the list
             app.addPackage(info.packageName, info.versionCode, mProcessStats);
-            checkTime(startTime, "startProcess: added package to existing proc");
         }
 
         // If the system is not ready yet, then hold off on starting this
@@ -4205,13 +4192,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             if (DEBUG_PROCESSES) Slog.v(TAG_PROCESSES,
                     "System not ready, putting on hold: " + app);
-            checkTime(startTime, "startProcess: returning with proc on hold");
             return app;
         }
 
-        checkTime(startTime, "startProcess: stepping in to startProcess");
         final boolean success = startProcessLocked(app, hostingType, hostingNameStr, abiOverride);
-        checkTime(startTime, "startProcess: done starting proc!");
         return success ? app : null;
     }
 
@@ -4243,12 +4227,10 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
         long startTime = SystemClock.elapsedRealtime();
         if (app.pid > 0 && app.pid != MY_PID) {
-            checkTime(startTime, "startProcess: removing from pids map");
             synchronized (mPidsSelfLocked) {
                 mPidsSelfLocked.remove(app.pid);
                 mHandler.removeMessages(PROC_START_TIMEOUT_MSG, app);
             }
-            checkTime(startTime, "startProcess: done removing from pids map");
             app.setPid(0);
             app.startSeq = 0;
         }
@@ -4257,9 +4239,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "startProcessLocked removing on hold: " + app);
         mProcessesOnHold.remove(app);
 
-        checkTime(startTime, "startProcess: starting to update cpu stats");
         updateCpuStats();
-        checkTime(startTime, "startProcess: done updating cpu stats");
 
         try {
             try {
@@ -4275,7 +4255,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!app.isolated) {
                 int[] permGids = null;
                 try {
-                    checkTime(startTime, "startProcess: getting gids from package manager");
                     final IPackageManager pm = AppGlobals.getPackageManager();
                     permGids = pm.getPackageGids(app.info.packageName,
                             MATCH_DEBUG_TRIAGED_MISSING, app.userId);
@@ -4305,7 +4284,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (gids[0] == UserHandle.ERR_GID) gids[0] = gids[2];
                 if (gids[1] == UserHandle.ERR_GID) gids[1] = gids[2];
             }
-            checkTime(startTime, "startProcess: building args");
             if (mFactoryTest != FactoryTest.FACTORY_TEST_OFF) {
                 if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
                         && mTopComponent != null
@@ -4518,7 +4496,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Start proc: " +
                     app.processName);
-            checkTime(startTime, "startProcess: asking zygote to start proc");
             final ProcessStartResult startResult;
             if (hostingType.equals("webview_service")) {
                 startResult = startWebView(entryPoint,
@@ -4542,7 +4519,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mPerfServiceStartHint.perfHint(BoostFramework.VENDOR_HINT_FIRST_LAUNCH_BOOST, app.processName, -1, BoostFramework.Launch.TYPE_SERVICE_START);
             }
 
-            checkTime(startTime, "startProcess: returned from zygote!");
             return startResult;
         } finally {
             Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
@@ -4600,7 +4576,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             return false;
         }
         mBatteryStatsService.noteProcessStart(app.processName, app.info.uid);
-        checkTime(app.startTime, "startProcess: done updating battery stats");
 
         EventLog.writeEvent(EventLogTags.AM_PROC_START,
                 UserHandle.getUserId(app.startUid), pid, app.startUid,
@@ -4618,7 +4593,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             Watchdog.getInstance().processStarted(app.processName, pid);
         }
 
-        checkTime(app.startTime, "startProcess: building log message");
         StringBuilder buf = mStringBuilder;
         buf.setLength(0);
         buf.append("Start proc ");
@@ -4642,7 +4616,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         app.setPid(pid);
         app.usingWrapper = usingWrapper;
         app.pendingStart = false;
-        checkTime(app.startTime, "startProcess: starting to update pids map");
         ProcessRecord oldApp;
         synchronized (mPidsSelfLocked) {
             oldApp = mPidsSelfLocked.get(pid);
@@ -4667,7 +4640,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ? PROC_START_TIMEOUT_WITH_WRAPPER : PROC_START_TIMEOUT);
             }
         }
-        checkTime(app.startTime, "startProcess: done updating pids map");
         return true;
     }
 
@@ -5124,7 +5096,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void reportOomAdjMessageLocked(String tag, String msg) {
-        Slog.d(tag, msg);
         if (mCurOomAdjObserver != null) {
             mUiHandler.obtainMessage(DISPATCH_OOM_ADJ_OBSERVER_MSG, msg).sendToTarget();
         }
@@ -5600,7 +5571,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (aInfo == null) {
                 // Nobody who is next!
                 SafeActivityOptions.abort(options);
-                if (debug) Slog.d(TAG, "Next matching activity: nothing found");
                 return false;
             }
 
@@ -7524,12 +7494,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         // We shouldn't already have a process under this name, but just in case we
         // need to clean up whatever may be there now.
         ProcessRecord old = removeProcessNameLocked(proc.processName, proc.uid);
-        if (old == proc && proc.persistent) {
-            // We are re-adding a persistent process.  Whatevs!  Just leave it there.
-            Slog.w(TAG, "Re-adding persistent process " + proc);
-        } else if (old != null) {
-            Slog.wtf(TAG, "Already have existing proc " + old + " when adding " + proc);
-        }
         UidRecord uidRec = mActiveUids.get(proc.uid);
         if (uidRec == null) {
             uidRec = new UidRecord(proc.uid);
@@ -7818,8 +7782,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mHandler.sendMessageDelayed(msg, CONTENT_PROVIDER_PUBLISH_TIMEOUT);
         }
 
-        checkTime(startTime, "attachApplicationLocked: before bindApplication");
-
         if (!normalMode) {
             Slog.i(TAG, "Launching preboot mode app: " + app);
         }
@@ -7958,7 +7920,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
             mStackSupervisor.getActivityMetricsLogger().notifyBindApplication(app);
             if (app.isolatedEntryPoint != null) {
                 // This is an isolated process which should just call an entry point instead of
@@ -7990,9 +7951,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 profilerInfo.closeFd();
                 profilerInfo = null;
             }
-            checkTime(startTime, "attachApplicationLocked: immediately after bindApplication");
             updateLruProcessLocked(app, false, null);
-            checkTime(startTime, "attachApplicationLocked: after updateLruProcessLocked");
             app.lastRequestedGc = app.lastLowMemory = SystemClock.uptimeMillis();
         } catch (Exception e) {
             // todo: Yikes!  What should we do?  For now we will try to
@@ -8031,7 +7990,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!badApp) {
             try {
                 didSomething |= mServices.attachApplicationLocked(app, processName);
-                checkTime(startTime, "attachApplicationLocked: after mServices.attachApplicationLocked");
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown starting services in " + app, e);
                 badApp = true;
@@ -8042,7 +8000,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (!badApp && isPendingBroadcastProcessLocked(pid)) {
             try {
                 didSomething |= sendPendingBroadcastsLocked(app);
-                checkTime(startTime, "attachApplicationLocked: after sendPendingBroadcastsLocked");
             } catch (Exception e) {
                 // If the app died trying to launch the receiver we declare it 'bad'
                 Slog.wtf(TAG, "Exception thrown dispatching broadcasts in " + app, e);
@@ -8074,7 +8031,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (!didSomething) {
             updateOomAdjLocked();
-            checkTime(startTime, "attachApplicationLocked: after updateOomAdjLocked");
         }
 
         return true;
@@ -9297,8 +9253,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         // client identity accordingly before proceeding.
         Identity tlsIdentity = sCallerIdentity.get();
         if (tlsIdentity != null && tlsIdentity.token == callerToken) {
-            Slog.d(TAG, "checkComponentPermission() adjusting {pid,uid} to {"
-                    + tlsIdentity.pid + "," + tlsIdentity.uid + "}");
             uid = tlsIdentity.uid;
             pid = tlsIdentity.pid;
         }
@@ -12277,14 +12231,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         return false;
     }
 
-    private void checkTime(long startTime, String where) {
-        long now = SystemClock.uptimeMillis();
-        if ((now-startTime) > 50) {
-            // If we are taking more than 50ms, log about it.
-            Slog.w(TAG, "Slow operation: " + (now-startTime) + "ms so far, now at " + where);
-        }
-    }
-
     private static final int[] PROCESS_STATE_STATS_FORMAT = new int[] {
             PROC_SPACE_TERM,
             PROC_SPACE_TERM|PROC_PARENS,
@@ -12336,8 +12282,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             boolean checkCrossUser = true;
 
-            checkTime(startTime, "getContentProviderImpl: getProviderByName");
-
             // First check if this content provider has been published...
             cpr = mProviderMap.getProviderByName(name, userId);
             // If that didn't work, check if it exists for user 0 and then
@@ -12367,26 +12311,22 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // (See the commit message on I2c4ba1e87c2d47f2013befff10c49b3dc337a9a7 to see
                 // how to test this case.)
                 if (cpr.proc.killed && cpr.proc.killedByAm) {
-                    checkTime(startTime, "getContentProviderImpl: before appDied (killedByAm)");
                     final long iden = Binder.clearCallingIdentity();
                     try {
                         appDiedLocked(cpr.proc);
                     } finally {
                         Binder.restoreCallingIdentity(iden);
                     }
-                    checkTime(startTime, "getContentProviderImpl: after appDied (killedByAm)");
                 }
             }
 
             if (providerRunning) {
                 cpi = cpr.info;
                 String msg;
-                checkTime(startTime, "getContentProviderImpl: before checkContentProviderPermission");
                 if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, checkCrossUser))
                         != null) {
                     throw new SecurityException(msg);
                 }
-                checkTime(startTime, "getContentProviderImpl: after checkContentProviderPermission");
 
                 if (r != null && cpr.canRunHere(r)) {
                     // This provider has been published or is in the process
@@ -12410,8 +12350,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 final long origId = Binder.clearCallingIdentity();
 
-                checkTime(startTime, "getContentProviderImpl: incProviderCountLocked");
-
                 // In this case the provider instance already exists, so we can
                 // return it right away.
                 conn = incProviderCountLocked(r, cpr, token, stable);
@@ -12421,13 +12359,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                         // make sure to count it as being accessed and thus
                         // back up on the LRU list.  This is good because
                         // content providers are often expensive to start.
-                        checkTime(startTime, "getContentProviderImpl: before updateLruProcess");
                         updateLruProcessLocked(cpr.proc, false, null);
-                        checkTime(startTime, "getContentProviderImpl: after updateLruProcess");
                     }
                 }
 
-                checkTime(startTime, "getContentProviderImpl: before updateOomAdj");
                 final int verifiedAdj = cpr.proc.verifiedAdj;
                 boolean success = updateOomAdjLocked(cpr.proc, true);
                 // XXX things have changed so updateOomAdjLocked doesn't actually tell us
@@ -12439,7 +12374,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     success = false;
                 }
                 maybeUpdateProviderUsageStatsLocked(r, cpr.info.packageName, name);
-                checkTime(startTime, "getContentProviderImpl: after updateOomAdj");
                 if (DEBUG_PROVIDER) Slog.i(TAG_PROVIDER, "Adjust success: " + success);
                 // NOTE: there is still a race here where a signal could be
                 // pending on the process even though we managed to update its
@@ -12453,9 +12387,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Slog.i(TAG, "Existing provider " + cpr.name.flattenToShortString()
                             + " is crashing; detaching " + r);
                     boolean lastRef = decProviderCountLocked(conn, cpr, token, stable);
-                    checkTime(startTime, "getContentProviderImpl: before appDied");
                     appDiedLocked(cpr.proc);
-                    checkTime(startTime, "getContentProviderImpl: after appDied");
                     if (!lastRef) {
                         // This wasn't the last ref our process had on
                         // the provider...  we have now been killed, bail.
@@ -12472,11 +12404,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (!providerRunning) {
                 try {
-                    checkTime(startTime, "getContentProviderImpl: before resolveContentProvider");
                     cpi = AppGlobals.getPackageManager().
                         resolveContentProvider(name,
                             STOCK_PM_FLAGS | PackageManager.GET_URI_PERMISSION_PATTERNS, userId);
-                    checkTime(startTime, "getContentProviderImpl: after resolveContentProvider");
                 } catch (RemoteException ex) {
                 }
                 if (cpi == null) {
@@ -12493,15 +12423,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                     userId = UserHandle.USER_SYSTEM;
                 }
                 cpi.applicationInfo = getAppInfoForUser(cpi.applicationInfo, userId);
-                checkTime(startTime, "getContentProviderImpl: got app info for user");
 
                 String msg;
-                checkTime(startTime, "getContentProviderImpl: before checkContentProviderPermission");
                 if ((msg = checkContentProviderPermissionLocked(cpi, r, userId, !singleton))
                         != null) {
                     throw new SecurityException(msg);
                 }
-                checkTime(startTime, "getContentProviderImpl: after checkContentProviderPermission");
 
                 if (!mProcessesReady
                         && !cpi.processName.equals("system")) {
@@ -12553,13 +12480,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
 
                     try {
-                        checkTime(startTime, "getContentProviderImpl: before getApplicationInfo");
                         ApplicationInfo ai =
                             AppGlobals.getPackageManager().
                                 getApplicationInfo(
                                         cpi.applicationInfo.packageName,
                                         STOCK_PM_FLAGS, userId);
-                        checkTime(startTime, "getContentProviderImpl: after getApplicationInfo");
                         if (ai == null) {
                             Slog.w(TAG, "No package info for content provider "
                                     + cpi.name);
@@ -12573,8 +12498,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         Binder.restoreCallingIdentity(ident);
                     }
                 }
-
-                checkTime(startTime, "getContentProviderImpl: now have ContentProviderRecord");
 
                 if (r != null && cpr.canRunHere(r)) {
                     // If this is a multiprocess provider, then just return its
@@ -12607,10 +12530,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     try {
                         // Content provider is now in use, its package can't be stopped.
                         try {
-                            checkTime(startTime, "getContentProviderImpl: before set stopped state");
                             AppGlobals.getPackageManager().setPackageStoppedState(
                                     cpr.appInfo.packageName, false, userId);
-                            checkTime(startTime, "getContentProviderImpl: after set stopped state");
                         } catch (RemoteException e) {
                         } catch (IllegalArgumentException e) {
                             Slog.w(TAG, "Failed trying to unstop package "
@@ -12618,14 +12539,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
 
                         // Use existing process if already started
-                        checkTime(startTime, "getContentProviderImpl: looking for process record");
                         ProcessRecord proc = getProcessRecordLocked(
                                 cpi.processName, cpr.appInfo.uid, false);
                         if (proc != null && proc.thread != null && !proc.killed) {
                             if (DEBUG_PROVIDER) Slog.d(TAG_PROVIDER,
                                     "Installing in existing process " + proc);
                             if (!proc.pubProviders.containsKey(cpi.name)) {
-                                checkTime(startTime, "getContentProviderImpl: scheduling install");
                                 proc.pubProviders.put(cpi.name, cpr);
                                 try {
                                     proc.thread.scheduleInstallProvider(cpi);
@@ -12633,12 +12552,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 }
                             }
                         } else {
-                            checkTime(startTime, "getContentProviderImpl: before start process");
                             proc = startProcessLocked(cpi.processName,
                                     cpr.appInfo, false, 0, "content provider",
                                     new ComponentName(cpi.applicationInfo.packageName,
                                             cpi.name), false, false, false);
-                            checkTime(startTime, "getContentProviderImpl: after start process");
                             if (proc == null) {
                                 Slog.w(TAG, "Unable to launch app "
                                         + cpi.applicationInfo.packageName + "/"
@@ -12654,8 +12571,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                 }
 
-                checkTime(startTime, "getContentProviderImpl: updating data structures");
-
                 // Make sure the provider is published (the same provider class
                 // may be published under multiple names).
                 if (!inLaunching) {
@@ -12668,8 +12583,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     conn.waiting = true;
                 }
             }
-            checkTime(startTime, "getContentProviderImpl: done!");
-
             grantEphemeralAccessLocked(userId, null /*intent*/,
                     cpi.applicationInfo.uid, UserHandle.getAppId(Binder.getCallingUid()));
         }
@@ -13478,8 +13391,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // Ensure we're done with the provider.
                 removeContentProviderExternalUnchecked(name, null, userId);
             }
-        } else {
-            Slog.d(TAG, "Failed to get provider for authority '" + name + "'");
         }
         return pfd;
     }
@@ -13657,7 +13568,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @GuardedBy("this")
     void startRunningVoiceLocked(IVoiceInteractionSession session, int targetUid) {
-        Slog.d(TAG, "<<<  startRunningVoiceLocked()");
+
         mVoiceWakeLock.setWorkSource(new WorkSource(targetUid));
         if (mRunningVoice == null || mRunningVoice.asBinder() != session.asBinder()) {
             boolean wasRunningVoice = mRunningVoice != null;
@@ -14079,8 +13990,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        Slog.d(TAG, "Bugreport notification title " + shareTitle
-                + " description " + shareDescription);
         requestBugReport(bugreportType);
     }
 
@@ -21435,19 +21344,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        // The vast majority of broadcasts sent from system internals
-        // should be protected to avoid security holes, so yell loudly
-        // to ensure we examine these cases.
-        if (callerApp != null) {
-            Log.wtf(TAG, "Sending non-protected broadcast " + action
-                            + " from system " + callerApp.toShortString() + " pkg " + callerPackage,
-                    new Throwable());
-        } else {
-            Log.wtf(TAG, "Sending non-protected broadcast " + action
-                            + " from system uid " + UserHandle.formatUid(callingUid)
-                            + " pkg " + callerPackage,
-                    new Throwable());
-        }
     }
 
     @GuardedBy("this")
@@ -22830,7 +22726,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         // Update stored global config and notify everyone about the change.
         mStackSupervisor.onConfigurationChanged(mTempConfig);
 
-        Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + mTempConfig);
         // TODO(multi-display): Update UsageEvents#Event to include displayId.
         mUsageStatsService.reportConfigurationChange(mTempConfig,
                 mUserController.getCurrentUserId());
@@ -23004,8 +22899,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mTempConfig.setTo(mStackSupervisor.getDisplayOverrideConfiguration(displayId));
         final int changes = mTempConfig.updateFrom(values);
         if (changes != 0) {
-            Slog.i(TAG, "Override config changes=" + Integer.toHexString(changes) + " "
-                    + mTempConfig + " for displayId=" + displayId);
             mStackSupervisor.setDisplayOverrideConfiguration(mTempConfig, displayId);
 
             final boolean isDensityChange = (changes & ActivityInfo.CONFIG_DENSITY) != 0;
@@ -26905,7 +26798,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 synchronized (mPidsSelfLocked) {
                     pr = mPidsSelfLocked.get(pid);
                     if (pr == null) {
-                        Slog.w(TAG, "setHasOverlayUi called on unknown pid: " + pid);
                         return;
                     }
                 }

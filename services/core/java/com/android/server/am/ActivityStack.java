@@ -392,7 +392,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     ActivityRecord r = (ActivityRecord)msg.obj;
                     // We don't at this point know if the activity is fullscreen,
                     // so we need to be conservative and assume it isn't.
-                    Slog.w(TAG, "Activity pause timeout for " + r);
                     synchronized (mService) {
                         if (r.app != null) {
                             mService.logAppTooSlow(r.app, r.pauseTime, "pausing " + r);
@@ -1277,7 +1276,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
         }
         if (mPausingActivity != null) {
-            Slog.d(TAG, "awakeFromSleepingLocked: previously pausing activity didn't pause");
             activityPausedLocked(mPausingActivity.appToken, true);
         }
     }
