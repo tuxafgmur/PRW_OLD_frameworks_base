@@ -269,7 +269,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
     @Override
     public void serviceDied(long cookie) {
-        Slog.v(TAG, "fingerprint HAL died");
+        //Slog.v(TAG, "fingerprint HAL died");
         MetricsLogger.count(mContext, "fingerprintd_died", 1);
         handleError(mHalDeviceId, FingerprintManager.FINGERPRINT_ERROR_HW_UNAVAILABLE,
                 0 /*vendorCode */);
@@ -277,7 +277,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
 
     public synchronized IBiometricsFingerprint getFingerprintDaemon() {
         if (mDaemon == null) {
-            Slog.v(TAG, "mDaemon was null, reconnect to fingerprint");
+            //Slog.v(TAG, "mDaemon was null, reconnect to fingerprint");
             try {
                 mDaemon = IBiometricsFingerprint.getService();
             } catch (java.util.NoSuchElementException e) {
@@ -286,7 +286,6 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 Slog.e(TAG, "Failed to get biometric interface", e);
             }
             if (mDaemon == null) {
-                Slog.w(TAG, "fingerprint HIDL not available");
                 return null;
             }
 
@@ -295,7 +294,6 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             try {
                 mHalDeviceId = mDaemon.setNotify(mDaemonCallback);
             } catch (RemoteException e) {
-                Slog.e(TAG, "Failed to open fingerprint HAL", e);
                 mDaemon = null; // try again later!
             }
 
@@ -305,7 +303,6 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 updateActiveGroup(ActivityManager.getCurrentUser(), null);
                 doFingerprintCleanupForUser(ActivityManager.getCurrentUser());
             } else {
-                Slog.w(TAG, "Failed to open Fingerprint HAL!");
                 MetricsLogger.count(mContext, "fingerprintd_openhal_error", 1);
                 mDaemon = null;
             }
@@ -326,10 +323,10 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
             }
         }
 
-        t = System.currentTimeMillis() - t;
-        if (t > 1000) {
-            Slog.w(TAG, "loadAuthenticatorIds() taking too long: " + t + "ms");
-        }
+        //t = System.currentTimeMillis() - t;
+        //if (t > 1000) {
+        //    Slog.w(TAG, "loadAuthenticatorIds() taking too long: " + t + "ms");
+        //}
     }
 
     /**
@@ -380,10 +377,10 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
                 List<Fingerprint> unknownFingerprints =
                         ((InternalEnumerateClient) client).getUnknownFingerprints();
 
-                if (!unknownFingerprints.isEmpty()) {
-                    Slog.w(TAG, "Adding " + unknownFingerprints.size() +
-                            " fingerprints for deletion");
-                }
+                //if (!unknownFingerprints.isEmpty()) {
+                //    Slog.w(TAG, "Adding " + unknownFingerprints.size() +
+                //            " fingerprints for deletion");
+                //}
                 for (Fingerprint f : unknownFingerprints) {
                     mUnknownFingerprints.add(new UserFingerprint(f, client.getTargetUserId()));
                 }
@@ -557,13 +554,13 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     public long startPreEnroll(IBinder token) {
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
-            Slog.w(TAG, "startPreEnroll: no fingerprint HAL!");
+            //Slog.w(TAG, "startPreEnroll: no fingerprint HAL!");
             return 0;
         }
         try {
             return daemon.preEnroll();
         } catch (RemoteException e) {
-            Slog.e(TAG, "startPreEnroll failed", e);
+            //Slog.e(TAG, "startPreEnroll failed", e);
         }
         return 0;
     }
@@ -571,13 +568,13 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
     public int startPostEnroll(IBinder token) {
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
-            Slog.w(TAG, "startPostEnroll: no fingerprint HAL!");
+            //Slog.w(TAG, "startPostEnroll: no fingerprint HAL!");
             return 0;
         }
         try {
             return daemon.postEnroll();
         } catch (RemoteException e) {
-            Slog.e(TAG, "startPostEnroll failed", e);
+            //Slog.e(TAG, "startPostEnroll failed", e);
         }
         return 0;
     }
@@ -677,7 +674,7 @@ public class FingerprintService extends SystemService implements IHwBinder.Death
         IFingerprintServiceReceiver receiver, boolean restricted, boolean internal) {
         IBiometricsFingerprint daemon = getFingerprintDaemon();
         if (daemon == null) {
-            Slog.w(TAG, "startEnumerate: no fingerprint HAL!");
+            //Slog.w(TAG, "startEnumerate: no fingerprint HAL!");
             return;
         }
         if (internal) {
