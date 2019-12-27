@@ -8890,11 +8890,11 @@ public class PackageManagerService extends IPackageManager.Stub
         final boolean newPkgChangedPaths =
                 pkgAlreadyExists && !pkgSetting.codePathString.equals(pkg.codePath);
         final boolean newPkgVersionGreater =
-                pkgAlreadyExists && pkg.getLongVersionCode() > pkgSetting.versionCode;
+                pkgAlreadyExists && pkg.getLongVersionCode() >= pkgSetting.versionCode;
         final boolean isSystemPkgBetter = scanSystemPartition && isSystemPkgUpdated
                 && newPkgChangedPaths && newPkgVersionGreater;
         if (isSystemPkgBetter) {
-            // The version of the application on /system is greater than the version on
+            // The version of the application on /system is greater or equal than the version on
             // /data. Switch back to the application on /system.
             // It's safe to assume the application on /system will correctly scan. If not,
             // there won't be a working copy of the application.
@@ -8919,8 +8919,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (scanSystemPartition && isSystemPkgUpdated && !isSystemPkgBetter) {
-            // The version of the application on the /system partition is less than or
-            // equal to the version on the /data partition. Even though the disabled system package
+            // The version of the application on the /system partition is less than
+            // the version on the /data partition. Even though the disabled system package
             // is likely to be replaced by a version on the /data partition, we make assumptions
             // that it's part of the mPackages collection during package manager initialization. So,
             // add it to mPackages if there isn't already a package in the collection and then throw
