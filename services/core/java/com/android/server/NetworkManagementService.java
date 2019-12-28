@@ -657,7 +657,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         synchronized (mQuotaLock) {
 
             if (hasKernelSupport) {
-                Slog.d(TAG, "enabling bandwidth control");
                 try {
                     mConnector.execute("bandwidth", "enable");
                     mBandwidthControlEnabled = true;
@@ -674,7 +673,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 mConnector.execute("strict", "enable");
                 mStrictEnabled = true;
             } catch (NativeDaemonConnectorException e) {
-                Log.wtf(TAG, "Failed strict enable", e);
             }
 
             setDataSaverModeEnabled(mDataSaverMode);
@@ -803,7 +801,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     private class NetdCallbackReceiver implements INativeDaemonConnectorCallbacks {
         @Override
         public void onDaemonConnected() {
-            Slog.i(TAG, "onDaemonConnected()");
             // event is dispatched from internal NDC thread, so we prepare the
             // daemon back on main thread.
             if (mConnectedSignal != null) {
@@ -1248,8 +1245,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void shutdown() {
         // TODO: remove from aidl if nobody calls externally
         mContext.enforceCallingOrSelfPermission(SHUTDOWN, TAG);
-
-        Slog.i(TAG, "Shutting down");
     }
 
     @Override
@@ -2293,10 +2288,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                         break;
                     case FIREWALL_CHAIN_NONE:
                     default:
-                        Slog.d(TAG, "setFirewallUidRules() called on invalid chain: " + chain);
                 }
             } catch (RemoteException e) {
-                Slog.w(TAG, "Error flushing firewall chain " + chain, e);
             }
         }
     }
@@ -2603,10 +2596,8 @@ public class NetworkManagementService extends INetworkManagementService.Stub
         try {
             mNetdService.networkDestroy(netId);
         } catch (ServiceSpecificException e) {
-            Log.w(TAG, "removeNetwork(" + netId + "): ", e);
             throw e;
         } catch (RemoteException e) {
-            Log.w(TAG, "removeNetwork(" + netId + "): ", e);
             throw e.rethrowAsRuntimeException();
         }
     }

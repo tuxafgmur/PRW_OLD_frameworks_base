@@ -207,7 +207,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final boolean VDBG = false;
 
     private static final boolean LOGD_RULES = false;
-    private static final boolean LOGD_BLOCKED_NETWORKINFO = true;
+    private static final boolean LOGD_BLOCKED_NETWORKINFO = false;
 
     // TODO: create better separation between radio types and network types
 
@@ -255,7 +255,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
     // 0 is full bad, 100 is full good
     private int mDefaultInetConditionPublished = 0;
 
-    private boolean mTestMode;
     private static ConnectivityService sServiceInstance;
 
     private INetworkManagementService mNetd;
@@ -861,9 +860,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (DBG) loge("Ignoring protectedNetwork " + p);
             }
         }
-
-        mTestMode = mSystemProperties.get("cm.test.mode").equals("true")
-                && mSystemProperties.get("ro.build.type").equals("eng");
 
         mTethering = makeTethering();
 
@@ -2758,8 +2754,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (mUidToNetworkRequestCount) {
             int requests = mUidToNetworkRequestCount.get(nri.mUid, 0);
             if (requests < 1) {
-                Slog.wtf(TAG, "BUG: too small request count " + requests + " for UID " +
-                        nri.mUid);
             } else if (requests == 1) {
                 mUidToNetworkRequestCount.removeAt(
                         mUidToNetworkRequestCount.indexOfKey(nri.mUid));
@@ -2792,20 +2786,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (!wasBackgroundNetwork && nai.isBackgroundNetwork()) {
                     // Went from foreground to background.
                     updateCapabilities(nai.getCurrentScore(), nai, nai.networkCapabilities);
-                }
-            }
-
-            // TODO: remove this code once we know that the Slog.wtf is never hit.
-            //
-            // Find all networks that are satisfying this request and remove the request
-            // from their request lists.
-            // TODO - it's my understanding that for a request there is only a single
-            // network satisfying it, so this loop is wasteful
-            for (NetworkAgentInfo otherNai : mNetworkAgentInfos.values()) {
-                if (otherNai.isSatisfyingRequest(nri.request.requestId) && otherNai != nai) {
-                    Slog.wtf(TAG, "Request " + nri.request + " satisfied by " +
-                            otherNai.name() + ", but mNetworkAgentInfos says " +
-                            (nai != null ? nai.name() : "null"));
                 }
             }
 
@@ -2877,10 +2857,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (nai.everValidated) {
             // The network validated while the dialog box was up. Take no action.
             return;
-        }
-
-        if (!nai.networkMisc.explicitlySelected) {
-            Slog.wtf(TAG, "BUG: setAcceptUnvalidated non non-explicitly selected network");
         }
 
         if (accept != nai.networkMisc.acceptUnvalidated) {
@@ -2996,7 +2972,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 action = ConnectivityManager.ACTION_PROMPT_LOST_VALIDATION;
                 break;
             default:
-                Slog.wtf(TAG, "Unknown notification type " + type);
                 return;
         }
 
@@ -3350,7 +3325,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (this) {
             if (!mNetTransitionWakeLock.isHeld()) {
                 mWakelockLogs.log(String.format("RELEASE: already released (%s)", event));
-                Slog.w(TAG, "expected Net Transition WakeLock to be held");
                 return;
             }
             mNetTransitionWakeLock.release();
@@ -3915,7 +3889,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 int user = UserHandle.getUserId(Binder.getCallingUid());
                 Vpn vpn = mVpns.get(user);
                 if (vpn == null) {
-                    Slog.w(TAG, "VPN for user " + user + " not ready yet. Skipping lockdown");
                     return false;
                 }
                 setLockdownTracker(new LockdownVpnTracker(mContext, mNetd, this, vpn, profile));

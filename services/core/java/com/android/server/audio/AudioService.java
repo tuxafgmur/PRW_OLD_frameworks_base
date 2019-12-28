@@ -1389,7 +1389,6 @@ public class AudioService extends IAudioService.Stub
         for (int surroundFormat : AudioFormat.SURROUND_SOUND_ENCODING) {
             boolean enabled = enabledSurroundFormats.contains(surroundFormat);
             int ret = AudioSystem.setSurroundFormatEnabled(surroundFormat, enabled);
-            Log.i(TAG, "enable surround format:" + surroundFormat + " " + enabled + " " + ret);
         }
     }
 
@@ -2091,7 +2090,6 @@ public class AudioService extends IAudioService.Stub
                     mForceControlStreamClient = new ForceControlStreamClient(cb);
                 } else {
                     if (mForceControlStreamClient.getBinder() == cb) {
-                        Log.d(TAG, "forceVolumeControlStream cb:" + cb + " is already linked.");
                     } else {
                         mForceControlStreamClient.release();
                         mForceControlStreamClient = new ForceControlStreamClient(cb);
@@ -2110,7 +2108,6 @@ public class AudioService extends IAudioService.Stub
                     cb.linkToDeath(this, 0);
                 } catch (RemoteException e) {
                     // Client has died!
-                    Log.w(TAG, "ForceControlStreamClient() could not link to "+cb+" binder death");
                     cb = null;
                 }
             }
@@ -3291,7 +3288,6 @@ public class AudioService extends IAudioService.Stub
     }
 
     public void setBluetoothScoOnInt(boolean on, String eventSource) {
-        Log.i(TAG, "setBluetoothScoOnInt: " + on + " " + eventSource);
         if (on) {
             // do not accept SCO ON if SCO audio is not connected
             synchronized (mScoClients) {
@@ -3299,8 +3295,6 @@ public class AudioService extends IAudioService.Stub
                         && (mBluetoothHeadset.getAudioState(mBluetoothHeadsetDevice)
                             != BluetoothHeadset.STATE_AUDIO_CONNECTED)) {
                     mForcedUseForCommExt = AudioSystem.FORCE_BT_SCO;
-                    Log.w(TAG, "setBluetoothScoOnInt(true) failed because "
-                            + mBluetoothHeadsetDevice + " is not in audio connected mode");
                     return;
                 }
             }
@@ -3495,8 +3489,6 @@ public class AudioService extends IAudioService.Stub
             checkScoAudioState();
             int clientCount = totalCount();
             if (clientCount != 0) {
-                Log.i(TAG, "requestScoState: state=" + state + ", scoAudioMode=" + scoAudioMode
-                        + ", clientCount=" + clientCount);
                 return;
             }
             if (state == BluetoothHeadset.STATE_AUDIO_CONNECTED) {
@@ -3789,16 +3781,11 @@ public class AudioService extends IAudioService.Stub
 
     private void setBtScoActiveDevice(BluetoothDevice btDevice) {
         synchronized (mScoClients) {
-            Log.i(TAG, "setBtScoActiveDevice: " + mBluetoothHeadsetDevice + " -> " + btDevice);
             final BluetoothDevice previousActiveDevice = mBluetoothHeadsetDevice;
             if (!Objects.equals(btDevice, previousActiveDevice)) {
                 if (!handleBtScoActiveDeviceChange(previousActiveDevice, false)) {
-                    Log.w(TAG, "setBtScoActiveDevice() failed to remove previous device "
-                            + previousActiveDevice);
                 }
                 if (!handleBtScoActiveDeviceChange(btDevice, true)) {
-                    Log.e(TAG, "setBtScoActiveDevice() failed to add new device " + btDevice);
-                    // set mBluetoothHeadsetDevice to null when failing to add new device
                     btDevice = null;
                 }
                 mBluetoothHeadsetDevice = btDevice;
@@ -5623,7 +5610,6 @@ public class AudioService extends IAudioService.Stub
 
                 case MSG_PLAY_SOUND_EFFECT:
                     if (isStreamMute(AudioSystem.STREAM_SYSTEM)) {
-                        Log.d(TAG, "Stream muted, skip playback");
                     } else {
                         onPlaySoundEffect(msg.arg1, msg.arg2);
                     }

@@ -81,8 +81,6 @@ public class KernelWakelockReader {
                     is = new FileInputStream(sWakeupSourceFile);
                     wakeup_sources = true;
                 } catch (java.io.FileNotFoundException e2) {
-                    Slog.w(TAG, "neither " + sWakelockFile + " nor " +
-                            sWakeupSourceFile + " exists, ignoring.");
                     return null;
                 }
             }
@@ -94,21 +92,12 @@ public class KernelWakelockReader {
 
             is.close();
         } catch (java.io.IOException e) {
-            Slog.w(TAG, "failed to read kernel wakelocks", e);
             return null;
         } finally {
             StrictMode.setThreadPolicyMask(oldMask);
         }
 
-        final long readTime = SystemClock.uptimeMillis() - startTime;
-        if (readTime > 100) {
-            Slog.w(TAG, "Reading wakelock stats took " + readTime + "ms");
-        }
-
         if (len > 0) {
-            if (len >= buffer.length) {
-                Slog.w(TAG, "Kernel wake locks exceeded buffer size " + buffer.length);
-            }
             int i;
             for (i=0; i<len; i++) {
                 if (buffer[i] == '\0') {
@@ -190,10 +179,7 @@ public class KernelWakelockReader {
                     }
                 } else if (!parsed) {
                     try {
-                        Slog.wtf(TAG, "Failed to parse proc line: " +
-                                new String(wlBuffer, startIndex, endIndex - startIndex));
                     } catch (Exception e) {
-                        Slog.wtf(TAG, "Failed to parse proc line!");
                     }
                 }
                 startIndex = endIndex + 1;
