@@ -27,6 +27,7 @@ import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.FileNotFoundException;
 
 /**
  * Reads /proc/uid_cputime/show_uid_stat which has the line format:
@@ -126,8 +127,9 @@ public class KernelUidCpuTimeReader extends
                     callback.onUidCpuTime(uid, userTimeDeltaUs, systemTimeDeltaUs);
                 }
             }
+        } catch (FileNotFoundException e) {
         } catch (IOException e) {
-            Slog.e(TAG, "Failed to read uid_cputime: " + e.getMessage());
+            //Slog.e(TAG, "Failed to read uid_cputime: " + e.getMessage());
         } finally {
             StrictMode.setThreadPolicyMask(oldMask);
         }
@@ -151,8 +153,9 @@ public class KernelUidCpuTimeReader extends
                 final long systemTimeUs = Long.parseLong(splitter.next(), 10);
                 callback.onUidCpuTime(uid, userTimeUs, systemTimeUs);
             }
+        } catch (FileNotFoundException e) {
         } catch (IOException e) {
-            Slog.e(TAG, "Failed to read uid_cputime: " + e.getMessage());
+            //Slog.e(TAG, "Failed to read uid_cputime: " + e.getMessage());
         } finally {
             StrictMode.setThreadPolicyMask(oldMask);
         }
@@ -198,14 +201,15 @@ public class KernelUidCpuTimeReader extends
     }
 
     private void removeUidsFromKernelModule(int startUid, int endUid) {
-        Slog.d(TAG, "Removing uids " + startUid + "-" + endUid);
+        //Slog.d(TAG, "Removing uids " + startUid + "-" + endUid);
         final int oldMask = StrictMode.allowThreadDiskWritesMask();
         try (FileWriter writer = new FileWriter(sRemoveUidProcFile)) {
             writer.write(startUid + "-" + endUid);
             writer.flush();
+        } catch (FileNotFoundException e) {
         } catch (IOException e) {
-            Slog.e(TAG, "failed to remove uids " + startUid + " - " + endUid
-                    + " from uid_cputime module", e);
+            //Slog.e(TAG, "failed to remove uids " + startUid + " - " + endUid
+            //        + " from uid_cputime module", e);
         } finally {
             StrictMode.setThreadPolicyMask(oldMask);
         }

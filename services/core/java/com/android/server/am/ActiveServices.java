@@ -306,8 +306,8 @@ public final class ActiveServices {
                 if (DEBUG_DELAYED_STARTS) Slog.v(TAG_SERVICE,
                         "REM FR DELAY LIST (exec next): " + r);
                 if (r.pendingStarts.size() <= 0) {
-                    Slog.w(TAG, "**** NO PENDING STARTS! " + r + " startReq=" + r.startRequested
-                            + " delayedStop=" + r.delayedStop);
+                //    Slog.w(TAG, "**** NO PENDING STARTS! " + r + " startReq=" + r.startRequested
+                //            + " delayedStop=" + r.delayedStop);
                 }
                 if (DEBUG_DELAYED_SERVICE) {
                     if (mDelayedStartList.size() > 0) {
@@ -477,10 +477,10 @@ public final class ActiveServices {
             final int allowed = mAm.getAppStartModeLocked(r.appInfo.uid, r.packageName,
                     r.appInfo.targetSdkVersion, callingPid, false, false, forcedStandby);
             if (allowed != ActivityManager.APP_START_MODE_NORMAL) {
-                Slog.w(TAG, "Background start not allowed: service "
-                        + service + " to " + r.name.flattenToShortString()
-                        + " from pid=" + callingPid + " uid=" + callingUid
-                        + " pkg=" + callingPackage + " startFg?=" + fgRequired);
+                //Slog.w(TAG, "Background start not allowed: service "
+                //        + service + " to " + r.name.flattenToShortString()
+                //        + " from pid=" + callingPid + " uid=" + callingUid
+                //        + " pkg=" + callingPackage + " startFg?=" + fgRequired);
                 if (allowed == ActivityManager.APP_START_MODE_DELAYED || forceSilentAbort) {
                     // In this case we are silently disabling the app, to disrupt as
                     // little as possible existing apps.

@@ -410,9 +410,9 @@ public final class BroadcastQueue {
         final int state = r.state;
         final ActivityInfo receiver = r.curReceiver;
         r.state = BroadcastRecord.IDLE;
-        if (state == BroadcastRecord.IDLE) {
-            Slog.w(TAG, "finishReceiver [" + mQueueName + "] called but state is IDLE");
-        }
+        //if (state == BroadcastRecord.IDLE) {
+        //    Slog.w(TAG, "finishReceiver [" + mQueueName + "] called but state is IDLE");
+        //}
         r.receiver = null;
         r.intent.setComponent(null);
         if (r.curApp != null && r.curApp.curReceivers.contains(r)) {
@@ -454,7 +454,7 @@ public final class BroadcastQueue {
                 // on.  If there are background services currently starting, then we will go into a
                 // special state where we hold off on continuing this broadcast until they are done.
                 if (mService.mServices.hasBackgroundServicesLocked(r.userId)) {
-                    Slog.i(TAG, "Delay finish: " + r.curComponent.flattenToShortString());
+                    //Slog.i(TAG, "Delay finish: " + r.curComponent.flattenToShortString());
                     r.state = BroadcastRecord.WAITING_SERVICES;
                     return false;
                 }
@@ -474,7 +474,7 @@ public final class BroadcastQueue {
         if (mOrderedBroadcasts.size() > 0) {
             BroadcastRecord br = mOrderedBroadcasts.get(0);
             if (br.userId == userId && br.state == BroadcastRecord.WAITING_SERVICES) {
-                Slog.i(TAG, "Resuming delayed broadcast");
+                //Slog.i(TAG, "Resuming delayed broadcast");
                 br.curComponent = null;
                 br.state = BroadcastRecord.IDLE;
                 processNextBroadcast(false);
@@ -619,8 +619,8 @@ public final class BroadcastQueue {
 
         if (!skip && (filter.receiverList.app == null || filter.receiverList.app.killed
                 || filter.receiverList.app.crashing)) {
-            Slog.w(TAG, "Skipping deliver [" + mQueueName + "] " + r
-                    + " to " + filter.receiverList + ": process gone or crashing");
+            //Slog.w(TAG, "Skipping deliver [" + mQueueName + "] " + r
+            //        + " to " + filter.receiverList + ": process gone or crashing");
             skip = true;
         }
 
@@ -896,9 +896,9 @@ public final class BroadcastQueue {
                 // It's still alive, so keep waiting
                 return;
             } else {
-                Slog.w(TAG, "pending app  ["
-                        + mQueueName + "]" + mPendingBroadcast.curApp
-                        + " died before responding to broadcast");
+                //Slog.w(TAG, "pending app  ["
+                //        + mQueueName + "]" + mPendingBroadcast.curApp
+                //        + " died before responding to broadcast");
                 mPendingBroadcast.state = BroadcastRecord.IDLE;
                 mPendingBroadcast.nextReceiver = mPendingBroadcastRecvIndex;
                 mPendingBroadcast = null;
@@ -1270,9 +1270,9 @@ public final class BroadcastQueue {
                 // to it and the app is in a state that should not receive it
                 // (depending on how getAppStartModeLocked has determined that).
                 if (allowed == ActivityManager.APP_START_MODE_DISABLED) {
-                    Slog.w(TAG, "Background execution disabled: receiving "
-                            + r.intent + " to "
-                            + component.flattenToShortString());
+                    //Slog.w(TAG, "Background execution disabled: receiving "
+                    //        + r.intent + " to "
+                    //        + component.flattenToShortString());
                     skip = true;
                 } else if (((r.intent.getFlags()&Intent.FLAG_RECEIVER_EXCLUDE_BACKGROUND) != 0)
                         || (r.intent.getComponent() == null
@@ -1282,9 +1282,9 @@ public final class BroadcastQueue {
                             && !isSignaturePerm(r.requiredPermissions))) {
                     mService.addBackgroundCheckViolationLocked(r.intent.getAction(),
                             component.getPackageName());
-                    Slog.w(TAG, "Background execution not allowed: receiving "
-                            + r.intent + " to "
-                            + component.flattenToShortString());
+                    //Slog.w(TAG, "Background execution not allowed: receiving "
+                    //        + r.intent + " to "
+                    //        + component.flattenToShortString());
                     skip = true;
                 }
             }
@@ -1295,9 +1295,9 @@ public final class BroadcastQueue {
                 .isUserRunning(UserHandle.getUserId(info.activityInfo.applicationInfo.uid),
                         0 /* flags */)) {
             skip = true;
-            Slog.w(TAG,
-                    "Skipping delivery to " + info.activityInfo.packageName + " / "
-                            + info.activityInfo.applicationInfo.uid + " : user is not running");
+            //Slog.w(TAG,
+            //        "Skipping delivery to " + info.activityInfo.packageName + " / "
+            //                + info.activityInfo.applicationInfo.uid + " : user is not running");
         }
 
         if (skip) {

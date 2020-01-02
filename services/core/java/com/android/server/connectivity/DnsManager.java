@@ -317,7 +317,7 @@ public class DnsManager {
     }
 
     public PrivateDnsConfig updatePrivateDns(Network network, PrivateDnsConfig cfg) {
-        Slog.w(TAG, "updatePrivateDns(" + network + ", " + cfg + ")");
+        //Slog.w(TAG, "updatePrivateDns(" + network + ", " + cfg + ")");
         return (cfg != null)
                 ? mPrivateDnsMap.put(network.netId, cfg)
                 : mPrivateDnsMap.remove(network.netId);
@@ -393,9 +393,9 @@ public class DnsManager {
             mPrivateDnsValidationMap.remove(netId);
         }
 
-        Slog.d(TAG, String.format("setDnsConfigurationForNetwork(%d, %s, %s, %s, %s, %s)",
-                netId, Arrays.toString(assignedServers), Arrays.toString(domainStrs),
-                Arrays.toString(params), tlsHostname, Arrays.toString(tlsServers)));
+        //Slog.d(TAG, String.format("setDnsConfigurationForNetwork(%d, %s, %s, %s, %s, %s)",
+        //        netId, Arrays.toString(assignedServers), Arrays.toString(domainStrs),
+        //        Arrays.toString(params), tlsHostname, Arrays.toString(tlsServers)));
         try {
             mNMS.setDnsConfigurationForNetwork(
                     netId, assignedServers, domainStrs, params, tlsHostname, tlsServers);

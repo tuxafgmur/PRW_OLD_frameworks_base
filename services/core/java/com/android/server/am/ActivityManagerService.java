@@ -10674,7 +10674,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 final ArrayMap<GrantUri, UriPermission> perms = mGrantedUriPermissions.get(
                         callingUid);
                 if (perms == null) {
-                    Slog.w(TAG, "No permission grants found for " + packageName);
+                    //Slog.w(TAG, "No permission grants found for " + packageName);
                 } else {
                     for (int j = 0; j < perms.size(); j++) {
                         final UriPermission perm = perms.valueAt(j);
