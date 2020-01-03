@@ -140,7 +140,7 @@ import java.util.function.Consumer;
  */
 public final class StrictMode {
     private static final String TAG = "StrictMode";
-    private static final boolean LOG_V = Log.isLoggable(TAG, Log.VERBOSE);
+    private static final boolean LOG_V = false;
 
     /**
      * Boolean system property to disable strict mode checks outright. Set this to 'true' to force
@@ -374,11 +374,11 @@ public final class StrictMode {
             info -> {
                 String msg;
                 if (info.durationMillis != -1) {
-                    msg = "StrictMode policy violation; ~duration=" + info.durationMillis + " ms:";
+                   // msg = "StrictMode policy violation; ~duration=" + info.durationMillis + " ms:";
                 } else {
-                    msg = "StrictMode policy violation:";
+                   // msg = "StrictMode policy violation:";
                 }
-                Log.d(TAG, msg + " " + info.getStackTrace());
+                // Log.d(TAG, msg + " " + info.getStackTrace());
             };
 
     private static volatile ViolationLogger sLogger = LOGCAT_LOGGER;
